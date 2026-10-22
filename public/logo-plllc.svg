@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Plllc">
+  <!-- Round logo: P blue, l yellow, l red, l white, c orange (ហង្សបាទ) on deep green -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="65%">
+      <stop offset="0" stop-color="#065f46"/>
+      <stop offset="1" stop-color="#022c22"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)"/>
+  <circle cx="60" cy="60" r="54" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+  <text x="60" y="73" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700" letter-spacing="0.5">
+    <tspan fill="#3b82f6">P</tspan><tspan fill="#facc15">l</tspan><tspan fill="#ef4444">l</tspan><tspan fill="#ffffff">l</tspan><tspan fill="#f97316">c</tspan>
+  </text>
+</svg>

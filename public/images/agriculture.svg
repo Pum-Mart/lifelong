@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="ប្រព័ន្ធដំណក់ទឹកក្នុងចម្ការ">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#e0f2fe"/></linearGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a16207"/><stop offset="1" stop-color="#713f12"/></linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="1320" cy="170" r="90" fill="#fde047"/>
+  <path d="M0 420 Q400 340 800 400 T1600 380 V900 H0Z" fill="#65a30d"/>
+  <path d="M0 520 Q800 460 1600 520 V900 H0Z" fill="url(#soil)"/>
+  <g stroke="#1e3a8a" stroke-width="8" fill="none">
+    <path d="M60 600 H1540"/><path d="M60 700 H1540"/><path d="M60 800 H1540"/>
+  </g>
+  <g fill="#16a34a">
+    <g id="row">
+      <path d="M140 600 q-30 -70 0 -120 q30 50 0 120z"/><path d="M140 600 q-60 -40 -70 -90 q50 10 70 90z"/><path d="M140 600 q60 -40 70 -90 q-50 10 -70 90z"/>
+    </g>
+    <use href="#row" x="200"/><use href="#row" x="400"/><use href="#row" x="600"/><use href="#row" x="800"/><use href="#row" x="1000"/><use href="#row" x="1200"/>
+    <use href="#row" y="100"/><use href="#row" x="200" y="100"/><use href="#row" x="400" y="100"/><use href="#row" x="600" y="100"/><use href="#row" x="800" y="100"/><use href="#row" x="1000" y="100"/><use href="#row" x="1200" y="100"/>
+  </g>
+  <g fill="#38bdf8">
+    <circle cx="140" cy="615" r="7"/><circle cx="340" cy="615" r="7"/><circle cx="540" cy="615" r="7"/><circle cx="740" cy="615" r="7"/><circle cx="940" cy="615" r="7"/><circle cx="1140" cy="615" r="7"/><circle cx="1340" cy="615" r="7"/>
+    <circle cx="140" cy="715" r="7"/><circle cx="340" cy="715" r="7"/><circle cx="540" cy="715" r="7"/><circle cx="740" cy="715" r="7"/><circle cx="940" cy="715" r="7"/><circle cx="1140" cy="715" r="7"/><circle cx="1340" cy="715" r="7"/>
+  </g>
+  <rect x="1380" y="300" width="160" height="200" rx="16" fill="#0ea5e9"/>
+  <rect x="1395" y="320" width="130" height="30" rx="8" fill="#e0f2fe"/>
+  <path d="M1460 500 V600" stroke="#1e3a8a" stroke-width="12"/>
+</svg>

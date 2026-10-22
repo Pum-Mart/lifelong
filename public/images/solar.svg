@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="បន្ទះសូឡាលើដំបូលផ្ទះ">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#fde68a"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="300" cy="220" r="110" fill="#fef08a"/>
+  <g stroke="#fef08a" stroke-width="10" stroke-linecap="round">
+    <path d="M300 60 V20"/><path d="M300 420 V380"/><path d="M140 220 H100"/><path d="M500 220 H460"/><path d="M190 110 L165 85"/><path d="M410 330 L435 355"/><path d="M410 110 L435 85"/><path d="M190 330 L165 355"/>
+  </g>
+  <rect y="760" width="1600" height="140" fill="#65a30d"/>
+  <rect x="620" y="500" width="760" height="270" fill="#fef3c7"/>
+  <rect x="920" y="590" width="130" height="180" fill="#92400e"/>
+  <rect x="700" y="570" width="150" height="110" fill="#bae6fd" stroke="#78350f" stroke-width="8"/>
+  <rect x="1130" y="570" width="150" height="110" fill="#bae6fd" stroke="#78350f" stroke-width="8"/>
+  <path d="M570 520 L1000 260 L1430 520 Z" fill="#b91c1c"/>
+  <g transform="matrix(1 -0.6 0 1 0 0)">
+    <g transform="translate(700 860)">
+      <rect width="560" height="150" fill="url(#panel)" stroke="#e2e8f0" stroke-width="6"/>
+      <g stroke="#93c5fd" stroke-width="3">
+        <path d="M112 0 V150"/><path d="M224 0 V150"/><path d="M336 0 V150"/><path d="M448 0 V150"/><path d="M0 75 H560"/>
+      </g>
+    </g>
+  </g>
+</svg>
