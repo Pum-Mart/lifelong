@@ -4,8 +4,9 @@ import { Course, CourseModule } from '@/types';
 import { requireAdmin } from '@/lib/auth';
 import { publicCourse } from '@/lib/assessments';
 import { isValidDate, parseSchedule } from '@/lib/schedule';
+import { withDatabase } from '@/lib/store';
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -119,3 +120,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to create course' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

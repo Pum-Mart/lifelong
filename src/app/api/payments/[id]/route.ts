@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { reviewPayment } from '@/lib/db';
 import { notifyPaymentReviewed } from '@/lib/telegram';
 import { requireAdmin } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { action: 'approve' | 'reject' }. Approving unlocks the courses for the student.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -30,3 +31,5 @@ export async function POST(
     return NextResponse.json({ success: false, error: 'Failed to review payment' }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

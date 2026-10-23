@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { runScheduledReports, sendCourseEndNotices, sendWeeklyReports } from '@/lib/reports';
+import { withDatabase } from '@/lib/store';
 
 // Body: { type: 'weekly' } sends the weekly letters now (admins).
 // The scheduler (scripts/telegram-bot.mjs) calls { type: 'scheduled' } with the shared secret
 // header; it only sends when a report is due.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
   const fromScheduler = Boolean(secret) && request.headers.get('x-scheduler-secret') === secret;
@@ -30,3 +31,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to send reports' }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

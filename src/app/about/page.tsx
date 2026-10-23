@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { io } from 'next/cache';
 import { Info, CheckCircle, BookOpen, Briefcase, Sparkles, Sprout, Award, ShieldCheck, Building2, Users, Camera } from 'lucide-react';
 import { getActivities } from '@/lib/content';
+import { runWithDatabase } from '@/lib/store';
 import ActivitySlideshow from '@/components/ActivitySlideshow';
 
 export const metadata = { title: 'អំពីមជ្ឈមណ្ឌល | Plllc - Lifelong Learning Center' };
@@ -170,5 +171,5 @@ export default function AboutPage() {
 async function Slides() {
   // Activities are added from /admin/content, so read them per request
   await io();
-  return <ActivitySlideshow activities={getActivities()} />;
+  return <ActivitySlideshow activities={await runWithDatabase(async () => getActivities())} />;
 }

@@ -3,11 +3,12 @@ import { getCourses, getEnrollments, getPayments, createPayment } from '@/lib/db
 import { BANK_ACCOUNTS, PAY_CURRENCIES, normalizeKhPhone, quotePayment } from '@/lib/payment';
 import { notifyPaymentSubmitted } from '@/lib/telegram';
 import { requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
 
 // ?scope=all lists everyone's payments (admins only); otherwise the user's own
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
 // Multipart form: courseIds (JSON array), couponCode, bankId, payCurrency (USD | KHR),
 // payerName, payerPhone (Cambodian number), transactionRef, receipt (optional image file).
 // Cash payments at the centre need neither a reference nor a receipt. The student is the signed-in user.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -121,3 +122,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to submit payment' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

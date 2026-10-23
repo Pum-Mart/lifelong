@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getNotifications, markNotificationsRead } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const notifications = getNotifications(auth.user.id);
@@ -10,9 +11,12 @@ export async function GET() {
 }
 
 // Marks every notification as read
-export async function POST() {
+async function handlePOST() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   markNotificationsRead(auth.user.id);
   return NextResponse.json({ success: true });
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

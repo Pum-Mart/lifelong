@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { getCourseBySlug, getUsers } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
+import { withDatabase } from '@/lib/store';
 
 // Body: { question } — a learner's question about a lesson, sent to the course's teachers and
 // the admins (inbox + Telegram for those who linked it)
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
@@ -31,3 +32,5 @@ export async function POST(
   );
   return NextResponse.json({ success: true, sentTo: recipients.length });
 }
+
+export const POST = withDatabase(handlePOST);

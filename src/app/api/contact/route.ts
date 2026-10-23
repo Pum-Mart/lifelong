@@ -4,6 +4,7 @@ import { getUsers } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
 import { escapeHtml, sendTelegramMessage } from '@/lib/telegram';
+import { withDatabase } from '@/lib/store';
 
 // Simple per-IP limit so the public form cannot flood Telegram
 const recent = new Map<string, number[]>();
@@ -20,7 +21,7 @@ function allowed(ip: string): boolean {
 }
 
 // Body: { kind: 'contact' | 'volunteer', name, contact, subject?, message }
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'local';
   if (!allowed(ip)) {
     return NextResponse.json({ success: false, error: 'អ្នកបានផ្ញើសារច្រើនពេក។ សូមរង់ចាំបន្តិច។' }, { status: 429 });
@@ -45,8 +46,11 @@ export async function POST(request: Request) {
   return NextResponse.json({ success: true, id: saved.id });
 }
 
-export async function GET() {
+async function handleGET() {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
   return NextResponse.json({ success: true, messages: getMessages() });
 }
+
+export const POST = withDatabase(handlePOST);
+export const GET = withDatabase(handleGET);

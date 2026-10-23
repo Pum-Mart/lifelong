@@ -3,12 +3,13 @@ import { readDatabase, rsvpWorkshopEvent } from '@/lib/db';
 import { getSessionUser, requireUser } from '@/lib/auth';
 import { notifyEventRsvp } from '@/lib/telegram';
 import { WorkshopEvent } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 // Attendee ids stay on the server
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const publicEvent = ({ attendeeIds, ...event }: WorkshopEvent) => event;
 
-export async function GET() {
+async function handleGET() {
   try {
     const db = readDatabase();
     const user = await getSessionUser();
@@ -20,7 +21,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -46,3 +47,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to RSVP' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

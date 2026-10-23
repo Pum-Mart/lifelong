@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { DOWNLOADS_PER_GRANT, getUsers, reviewDownloadRequest } from '@/lib/db';
 import { canApproveResults, requireUser } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
+import { withDatabase } from '@/lib/store';
 
 // Body: { action: 'approve' | 'reject', note? }. Approving grants more downloads.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -38,3 +39,5 @@ export async function POST(
   }
   return NextResponse.json({ success: true, request: reviewed });
 }
+
+export const POST = withDatabase(handlePOST);

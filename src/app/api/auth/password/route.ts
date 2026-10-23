@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { updateUser } from '@/lib/db';
 import { getSessionAccount, hashPassword, startSession, validatePassword, verifyPassword } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { currentPassword, newPassword }. Signs out every other session.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const account = await getSessionAccount();
   if (!account) {
     return NextResponse.json({ success: false, error: 'សូមចូលគណនីជាមុនសិន', loginRequired: true }, { status: 401 });
@@ -32,3 +33,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to change password' }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

@@ -3,6 +3,7 @@ import { getCourseBySlug, saveCourseAssessments } from '@/lib/db';
 import { canManageCourse, requireStaff } from '@/lib/auth';
 import { questionSet } from '@/lib/assessments';
 import { QuizQuestion } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 async function authorize(courseId: string) {
   const auth = await requireStaff();
@@ -16,7 +17,7 @@ async function authorize(courseId: string) {
 }
 
 // Full questions (with answers) for the teacher's editor
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -54,7 +55,7 @@ function clean(list: unknown, prefix: string): QuizQuestion[] | string {
 }
 
 // Body: { preTest: QuizQuestion[], exam: QuizQuestion[] }
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -72,3 +73,6 @@ export async function PUT(
   saveCourseAssessments(auth.course.id, { preTest, exam });
   return NextResponse.json({ success: true, preTest, exam });
 }
+
+export const GET = withDatabase(handleGET);
+export const PUT = withDatabase(handlePUT);

@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createUser, getUserByEmail } from '@/lib/db';
 import { hashPassword, isOwnerEmail, startSession, toSessionUser, validatePassword } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Body: { name, email, password, joinMembership }
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const name = String(body.name ?? '').trim();
@@ -38,3 +39,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to create account' }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

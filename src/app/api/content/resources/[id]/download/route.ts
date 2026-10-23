@@ -1,15 +1,14 @@
-import fs from 'fs';
-import path from 'path';
 import { NextResponse } from 'next/server';
 import { countResourceDownload, getResources } from '@/lib/content';
 import { getCourseBySlug } from '@/lib/db';
-import { UPLOAD_DIR } from '@/lib/uploads';
+import { UPLOAD_NAME_PATTERN, readUpload } from '@/lib/uploads';
+import { withDatabase } from '@/lib/store';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // Public library download: the uploaded file, or a course guide generated from the course
 // (lesson titles, summaries and learning outcomes only — no full lesson content or answers).
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -19,13 +18,13 @@ export async function GET(
 
   if (resource.file) {
     const name = resource.file.url.split('/').pop() || '';
-    const filePath = path.join(UPLOAD_DIR, name);
-    if (!/^[a-z0-9-]+\.[a-z]+$/.test(name) || !fs.existsSync(filePath)) {
+    const bytes = UPLOAD_NAME_PATTERN.test(name) ? await readUpload(name) : null;
+    if (!bytes) {
       return NextResponse.json({ success: false, error: 'File missing' }, { status: 404 });
     }
     countResourceDownload(id);
     const safeName = resource.file.name.replace(/[^\w.\- ]+/g, '_') || name;
-    return new Response(fs.readFileSync(filePath), {
+    return new Response(bytes as BodyInit, {
       headers: {
         'Content-Type': resource.file.mime,
         'Content-Disposition': `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(resource.file.name)}`,
@@ -76,3 +75,5 @@ export async function GET(
     }
   });
 }
+
+export const GET = withDatabase(handleGET);

@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { Course, Enrollment, Certificate, WorkshopEvent, AdminAnalytics, Instructor, Payment, PaymentStatus, Registration, UserAccount, ClassSession, ExamScore, AppNotification, ClassNotice, CourseCompletion, AssessmentAttempt, CertificateRequest, QuizQuestion, RetakeRequest, DownloadRequest } from '@/types';
 import { INITIAL_COURSES, INSTRUCTORS, WORKSHOP_EVENTS } from './data';
+import { currentStore, usesPostgres } from './store';
 
 interface DatabaseSchema {
   courses: Course[];
@@ -148,7 +149,40 @@ function getInitialData(): DatabaseSchema {
   };
 }
 
+// Databases created before these features existed lack their lists
+function withDefaults(parsed: DatabaseSchema): DatabaseSchema {
+  parsed.payments = parsed.payments || [];
+  parsed.registrations = parsed.registrations || [];
+  parsed.users = parsed.users || [];
+  parsed.sessions = parsed.sessions || [];
+  parsed.examScores = parsed.examScores || [];
+  parsed.notifications = parsed.notifications || [];
+  parsed.classNotices = parsed.classNotices || [];
+  parsed.settings = parsed.settings || {};
+  parsed.completions = parsed.completions || [];
+  parsed.attempts = parsed.attempts || [];
+  parsed.certificateRequests = parsed.certificateRequests || [];
+  parsed.retakeRequests = parsed.retakeRequests || [];
+  parsed.downloadRequests = parsed.downloadRequests || [];
+  return parsed;
+}
+
+const NOT_LOADED = 'Database not loaded: wrap this route handler with withDatabase() (src/lib/store.ts)';
+
+// Each call returns a fresh copy, as reading the file did, so changes only count once written
 export function readDatabase(): DatabaseSchema {
+  // Postgres (Vercel): the copy loaded for this request
+  const store = currentStore();
+  if (store) {
+    if (!store.data) {
+      store.data = getInitialData();
+      store.dirty = true;
+    }
+    return withDefaults(structuredClone(store.data) as DatabaseSchema);
+  }
+  if (usesPostgres()) throw new Error(NOT_LOADED);
+
+  // Local: data/database.json
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -160,40 +194,28 @@ export function readDatabase(): DatabaseSchema {
       return initial;
     }
 
-    const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
-    const parsed = JSON.parse(fileContent);
-    // Databases created before these features existed lack their lists
-    parsed.payments = parsed.payments || [];
-    parsed.registrations = parsed.registrations || [];
-    parsed.users = parsed.users || [];
-    parsed.sessions = parsed.sessions || [];
-    parsed.examScores = parsed.examScores || [];
-    parsed.notifications = parsed.notifications || [];
-    parsed.classNotices = parsed.classNotices || [];
-    parsed.settings = parsed.settings || {};
-    parsed.completions = parsed.completions || [];
-    parsed.attempts = parsed.attempts || [];
-    parsed.certificateRequests = parsed.certificateRequests || [];
-    parsed.retakeRequests = parsed.retakeRequests || [];
-    parsed.downloadRequests = parsed.downloadRequests || [];
-    return parsed;
+    return withDefaults(JSON.parse(fs.readFileSync(DB_FILE, 'utf-8')));
   } catch (error) {
     console.error('Failed reading database file, returning in-memory initial data', error);
     return getInitialData();
   }
 }
 
+// Throws when the data cannot be saved, so a request never reports success for lost changes
 export function writeDatabase(data: DatabaseSchema): boolean {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  const store = currentStore();
+  if (store) {
+    store.data = structuredClone(data);
+    store.dirty = true;
     return true;
-  } catch (error) {
-    console.error('Failed writing database file:', error);
-    return false;
   }
+  if (usesPostgres()) throw new Error(NOT_LOADED);
+
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  return true;
 }
 
 // Helpers for specific entities

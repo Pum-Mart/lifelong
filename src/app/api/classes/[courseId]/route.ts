@@ -3,9 +3,10 @@ import { getCourseBySlug, getCourseStudents, getExamScores, getSessions } from '
 import { canManageCourse, requireStaff } from '@/lib/auth';
 import { gradeForStudent } from '@/lib/assessments';
 import { SCHEME_WEIGHTS, schemeFor } from '@/lib/grades';
+import { withDatabase } from '@/lib/store';
 
 // Class book of one course: roster, daily sessions, exam scores and computed grades
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -34,3 +35,5 @@ export async function GET(
     grades
   });
 }
+
+export const GET = withDatabase(handleGET);

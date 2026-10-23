@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { deleteAnnouncement, getAnnouncements, saveAnnouncement } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
+import { withDatabase } from '@/lib/store';
 
 // Multipart form: title, body, published, image (optional), removeImage ('true')
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -35,7 +36,7 @@ export async function PUT(
   return NextResponse.json({ success: true, announcement });
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -44,3 +45,6 @@ export async function DELETE(
   const { id } = await params;
   return NextResponse.json({ success: deleteAnnouncement(id) });
 }
+
+export const PUT = withDatabase(handlePUT);
+export const DELETE = withDatabase(handleDELETE);

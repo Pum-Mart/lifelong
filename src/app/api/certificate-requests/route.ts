@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getCertificateRequests } from '@/lib/db';
 import { canApproveResults, requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Self-study certificate requests for the director, committee and admins: pending first
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   if (!canApproveResults(auth.user)) {
@@ -15,3 +16,5 @@ export async function GET() {
   );
   return NextResponse.json({ success: true, requests });
 }
+
+export const GET = withDatabase(handleGET);

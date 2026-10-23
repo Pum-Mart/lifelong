@@ -1,10 +1,34 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { get, put } from '@vercel/blob';
 
-// Uploaded photos live in data/uploads (not public/, which production only serves
-// as it was at build time) and are served by /api/uploads/[name].
+// Uploaded files are served by /api/uploads/[name]. Locally they live in data/uploads (not
+// public/, which production only serves as it was at build time). On Vercel, whose file system
+// is read-only, they are kept in a private Vercel Blob store when BLOB_READ_WRITE_TOKEN is set.
 export const UPLOAD_DIR = path.join(process.cwd(), 'data', 'uploads');
+const usesBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+const blobPath = (name: string) => `uploads/${name}`;
+
+async function storeUpload(name: string, file: File) {
+  if (usesBlob()) {
+    await put(blobPath(name), file, { access: 'private', addRandomSuffix: false, contentType: file.type });
+    return;
+  }
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  fs.writeFileSync(path.join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+}
+
+// The stored bytes, or null when there is no such upload. `name` must already be validated.
+export async function readUpload(name: string): Promise<Uint8Array | null> {
+  if (usesBlob()) {
+    const result = await get(blobPath(name), { access: 'private' }).catch(() => null);
+    if (!result || result.statusCode !== 200) return null;
+    return new Uint8Array(await new Response(result.stream).arrayBuffer());
+  }
+  const filePath = path.join(UPLOAD_DIR, name);
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath) : null;
+}
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 const EXTENSIONS: Record<string, string> = {
@@ -36,9 +60,8 @@ export function validateDocument(file: File): string | null {
 }
 
 export async function saveDocument(file: File): Promise<string> {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   const name = `doc-${crypto.randomUUID()}.${DOCUMENT_EXTENSIONS[file.type]}`;
-  fs.writeFileSync(path.join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+  await storeUpload(name, file);
   return `/api/uploads/${name}`;
 }
 
@@ -50,9 +73,8 @@ export function validateImage(file: File): string | null {
 
 // Saves an already-validated image and returns its public URL.
 export async function saveImage(file: File, prefix: string): Promise<string> {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   const name = `${prefix}-${crypto.randomUUID()}.${EXTENSIONS[file.type]}`;
-  fs.writeFileSync(path.join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+  await storeUpload(name, file);
   return `/api/uploads/${name}`;
 }
 

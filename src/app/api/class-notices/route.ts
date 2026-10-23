@@ -4,11 +4,12 @@ import { canManageCourse, requireStaff, requireUser } from '@/lib/auth';
 import { cambodiaNow, deliver } from '@/lib/reports';
 import { formatClassTime, formatKhmerDateWithDay, isValidDate } from '@/lib/schedule';
 import { ClassNotice, ClassNoticeKind } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 // Staff: the notices for the courses they manage. Students: upcoming notices for their courses.
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -32,7 +33,7 @@ export async function GET() {
   return NextResponse.json({ success: true, notices: upcoming });
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireStaff();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -107,3 +108,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to send notice' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

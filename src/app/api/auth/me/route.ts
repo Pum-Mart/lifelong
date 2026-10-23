@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { updateUser } from '@/lib/db';
 import { getSessionUser, requireUser, toSessionUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({ success: true, user: await getSessionUser() });
 }
 
 // Body: { name?, isMember? } — lets a user rename themselves and join/leave membership
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -32,3 +33,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to update account' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const PATCH = withDatabase(handlePATCH);

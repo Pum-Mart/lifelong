@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { getEnrollments, enrollStudent, getCourseBySlug } from '@/lib/db';
 import { notifyNewOrder } from '@/lib/telegram';
 import { requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // ?scope=all lists everyone's enrollments (admins only); otherwise the user's own
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 }
 
 // Body: { courseId }. Enrolls the signed-in user in a free course.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -58,3 +59,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to enroll student' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

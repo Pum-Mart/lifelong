@@ -3,6 +3,7 @@ import { io } from 'next/cache';
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import { getInstructors, getCourses } from '@/lib/db';
+import { runWithDatabase } from '@/lib/store';
 
 export default function TeachersPage() {
   return (
@@ -25,8 +26,7 @@ export default function TeachersPage() {
 async function TeacherList() {
   // Teachers are edited from /admin, so read them per request rather than at build time
   await io();
-  const instructors = getInstructors();
-  const courses = getCourses();
+  const { instructors, courses } = await runWithDatabase(async () => ({ instructors: getInstructors(), courses: getCourses() }));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

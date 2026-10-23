@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { setMessageHandled } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { handled: boolean }
-export async function PATCH(
+async function handlePATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -13,3 +14,5 @@ export async function PATCH(
   const { handled } = await request.json();
   return NextResponse.json({ success: setMessageHandled(id, Boolean(handled)) });
 }
+
+export const PATCH = withDatabase(handlePATCH);

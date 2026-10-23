@@ -3,8 +3,9 @@ import { getInstructors, saveInstructor } from '@/lib/db';
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
 import { Instructor } from '@/types';
 import { requireAdmin } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   try {
     return NextResponse.json({ success: true, instructors: getInstructors() });
   } catch (error) {
@@ -14,7 +15,7 @@ export async function GET() {
 }
 
 // Multipart form: name, title, bio, experience, credentials (one per line), photo (image file)
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -54,3 +55,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to create instructor' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

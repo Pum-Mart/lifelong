@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRegistrationByCode, getUserByTelegramCode, markRegistrationVerified, updateUser } from '@/lib/db';
 import { sendTelegramReply, registrationVerifiedMessage, escapeHtml } from '@/lib/telegram';
+import { withDatabase } from '@/lib/store';
 
 // Same alphabet as newRegistrationCode in db.ts
 const CODE_PATTERN = /REG-[2-9A-HJ-NP-Z]{6}/i;
@@ -17,7 +18,7 @@ interface TelegramMessage {
 
 // Receives Telegram updates, either from Telegram itself (setWebhook, once the site is
 // online) or from scripts/telegram-bot.mjs while running locally.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (!secret || request.headers.get('x-telegram-bot-api-secret-token') !== secret) {
     return NextResponse.json({ ok: false }, { status: 401 });
@@ -80,3 +81,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 }
+
+export const POST = withDatabase(handlePOST);

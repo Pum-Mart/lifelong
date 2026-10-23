@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { deleteClassNotice, getClassNotices, getCourses } from '@/lib/db';
 import { canManageCourse, requireStaff } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Removes a notice from the lists; messages already delivered to inboxes stay
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -21,3 +22,5 @@ export async function DELETE(
   deleteClassNotice(id);
   return NextResponse.json({ success: true });
 }
+
+export const DELETE = withDatabase(handleDELETE);

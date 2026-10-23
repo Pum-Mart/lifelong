@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { consumeCertificateDownload, downloadsLeft, getCertificateById } from '@/lib/db';
 import { canApproveResults, requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Called right before printing / saving the PDF. Learners have a limited number of downloads;
 // the director, committee and admins can always print.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -30,3 +31,5 @@ export async function POST(
   const left = consumeCertificateDownload(cert.id);
   return NextResponse.json({ success: true, downloadsLeft: left });
 }
+
+export const POST = withDatabase(handlePOST);

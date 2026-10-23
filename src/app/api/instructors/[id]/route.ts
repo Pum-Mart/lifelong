@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { getInstructors, saveInstructor, deleteInstructor } from '@/lib/db';
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
+import { withDatabase } from '@/lib/store';
 
 // Multipart form with the same fields as POST /api/instructors; photo is optional here
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -50,7 +51,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -72,3 +73,6 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: 'Failed to delete instructor' }, { status: 500 });
   }
 }
+
+export const PUT = withDatabase(handlePUT);
+export const DELETE = withDatabase(handleDELETE);

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getCompletions } from '@/lib/db';
 import { canApproveResults, requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Result sheets for the director: waiting ones first, then recent decisions
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   if (!canApproveResults(auth.user)) {
@@ -15,3 +16,5 @@ export async function GET() {
     .sort((a, b) => order[a.status] - order[b.status] || b.updatedAt.localeCompare(a.updatedAt));
   return NextResponse.json({ success: true, completions });
 }
+
+export const GET = withDatabase(handleGET);

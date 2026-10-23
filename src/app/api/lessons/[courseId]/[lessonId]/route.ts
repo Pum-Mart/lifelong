@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCourseBySlug, getEnrollments } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { SessionUser } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -12,7 +13,7 @@ function canDownloadLessons(user: SessionUser, enrolled: boolean): boolean {
 }
 
 // Returns the lesson as a self-contained HTML file (opens offline; print → Save as PDF)
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
@@ -75,3 +76,5 @@ export async function GET(
     }
   });
 }
+
+export const GET = withDatabase(handleGET);

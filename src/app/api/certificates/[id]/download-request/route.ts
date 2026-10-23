@@ -3,9 +3,10 @@ import { createDownloadRequest, downloadsLeft, getCertificateById, getDownloadRe
 import { requireUser } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
 import { escapeHtml, sendTelegramMessage } from '@/lib/telegram';
+import { withDatabase } from '@/lib/store';
 
 // Body: { reason } — asks the director/committee/admin for more downloads of one's certificate
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -54,3 +55,5 @@ export async function POST(
   await sendTelegramMessage(`<b>${escapeHtml(title)}</b>\n\n${escapeHtml(body)}`);
   return NextResponse.json({ success: true, request: created });
 }
+
+export const POST = withDatabase(handlePOST);

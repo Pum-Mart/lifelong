@@ -1,6 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { UPLOAD_DIR, UPLOAD_NAME_PATTERN } from '@/lib/uploads';
+import { UPLOAD_NAME_PATTERN, readUpload } from '@/lib/uploads';
 
 const CONTENT_TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
@@ -27,13 +25,13 @@ export async function GET(
     return new Response('Not found', { status: 404 });
   }
 
-  const filePath = path.join(UPLOAD_DIR, name);
-  if (!fs.existsSync(filePath)) {
+  const bytes = await readUpload(name);
+  if (!bytes) {
     return new Response('Not found', { status: 404 });
   }
 
   const ext = name.split('.').pop() as string;
-  return new Response(fs.readFileSync(filePath), {
+  return new Response(bytes as BodyInit, {
     headers: {
       'Content-Type': CONTENT_TYPES[ext],
       'Cache-Control': 'public, max-age=31536000, immutable',

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getCourseBySlug, getCourseStudents, saveExamScore } from '@/lib/db';
 import { canManageCourse, requireStaff } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { userId, score } — score 0-100, or null to clear
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -31,3 +32,5 @@ export async function PUT(
   saveExamScore(course.id, body.userId, value);
   return NextResponse.json({ success: true });
 }
+
+export const PUT = withDatabase(handlePUT);

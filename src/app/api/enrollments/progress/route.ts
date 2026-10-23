@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { updateLessonProgress } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { courseId, lessonId, completed } for the signed-in user
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -31,3 +32,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

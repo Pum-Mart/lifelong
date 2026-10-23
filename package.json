@@ -10,6 +10,8 @@
     "bot": "node --env-file=.env.local scripts/telegram-bot.mjs"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "@vercel/blob": "^2.8.2",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "lucide-react": "^1.58.0",

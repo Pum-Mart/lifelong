@@ -4,9 +4,10 @@ import { approverTitle, canApproveResults, requireUser } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
 import { retryMessage } from '@/lib/assessments';
 import { escapeHtml, sendTelegramMessage } from '@/lib/telegram';
+import { withDatabase } from '@/lib/store';
 
 // Body: { action: 'approve' | 'reject', note? }. Approving issues certificates automatically.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -66,3 +67,5 @@ export async function POST(
 
   return NextResponse.json({ success: false, error: 'action must be approve or reject' }, { status: 400 });
 }
+
+export const POST = withDatabase(handlePOST);

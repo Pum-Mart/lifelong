@@ -3,9 +3,10 @@ import { getCourses, getEnrollments, getSessions } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { countedSessions, SCHEME_WEIGHTS, schemeFor } from '@/lib/grades';
 import { gradeForStudent } from '@/lib/assessments';
+import { withDatabase } from '@/lib/store';
 
 // The signed-in student's attendance, daily checklist and grade for each enrolled course
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   const { user } = auth;
@@ -42,3 +43,5 @@ export async function GET() {
 
   return NextResponse.json({ success: true, courses: results });
 }
+
+export const GET = withDatabase(handleGET);

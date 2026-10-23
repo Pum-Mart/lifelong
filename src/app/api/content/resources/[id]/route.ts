@@ -3,11 +3,12 @@ import { deleteResource, getResources, saveResource } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
 import { imageFrom, saveDocument, validateDocument } from '@/lib/uploads';
 import { ResourceType } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 const TYPES: ResourceType[] = ['guides', 'curricula', 'toolkits', 'publications', 'teaching'];
 
 // Multipart form: title, type, category, description, file (optional — keeps the current one)
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -42,7 +43,7 @@ export async function PUT(
   return NextResponse.json({ success: true, resource });
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -51,3 +52,6 @@ export async function DELETE(
   const { id } = await params;
   return NextResponse.json({ success: deleteResource(id) });
 }
+
+export const PUT = withDatabase(handlePUT);
+export const DELETE = withDatabase(handleDELETE);

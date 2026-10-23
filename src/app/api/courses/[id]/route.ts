@@ -4,8 +4,9 @@ import { publicCourse } from '@/lib/assessments';
 import { getCourseBySlug, saveCourse, deleteCourse, getInstructors, getCourses } from '@/lib/db';
 import { Course } from '@/types';
 import { isValidDate, parseSchedule } from '@/lib/schedule';
+import { withDatabase } from '@/lib/store';
 
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -22,7 +23,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -158,7 +159,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -178,3 +179,7 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: 'Failed to delete course' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const PUT = withDatabase(handlePUT);
+export const DELETE = withDatabase(handleDELETE);

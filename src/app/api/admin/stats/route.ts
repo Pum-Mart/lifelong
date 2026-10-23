@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAdminAnalytics } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -14,3 +15,5 @@ export async function GET() {
     return NextResponse.json({ success: false, error: 'Failed to fetch admin stats' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);

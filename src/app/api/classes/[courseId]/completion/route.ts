@@ -7,6 +7,7 @@ import { Course, GradingScheme } from '@/types';
 import { deliver } from '@/lib/reports';
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram';
 import { CompletionResult, CourseCompletion } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 // Free courses: certificate from 65; paid courses: every learner receives one
 const passes = (scheme: GradingScheme, total: number) => scheme === 'paid' || total >= PASS_SCORE;
@@ -34,7 +35,7 @@ function computedResults(course: Course): CompletionResult[] {
 }
 
 // The saved sheet, or a fresh draft computed from the class book. ?recompute=1 re-pulls the scores.
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -68,7 +69,7 @@ const pct = (value: unknown): number | null => {
 
 // Body: { courseCompleted, results: [{ userId, attendancePct, testPct, exercisePct, examPct }], submit }
 // submit: true sends the sheet to the centre director for approval.
-export async function PUT(
+async function handlePUT(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -137,3 +138,6 @@ export async function PUT(
 
   return NextResponse.json({ success: true, completion });
 }
+
+export const GET = withDatabase(handleGET);
+export const PUT = withDatabase(handlePUT);

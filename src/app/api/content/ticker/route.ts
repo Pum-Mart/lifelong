@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getTicker, saveTicker } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({ success: true, messages: getTicker() });
 }
 
 // Body: { messages: [{ text, href? }] } — replaces the whole list in order
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -26,3 +27,6 @@ export async function PUT(request: Request) {
   }
   return NextResponse.json({ success: true, messages: saveTicker(messages) });
 }
+
+export const GET = withDatabase(handleGET);
+export const PUT = withDatabase(handlePUT);

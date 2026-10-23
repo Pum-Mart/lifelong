@@ -3,6 +3,7 @@ import { io } from 'next/cache';
 import Link from 'next/link';
 import { Megaphone, Phone, Send } from 'lucide-react';
 import { getAnnouncements } from '@/lib/content';
+import { runWithDatabase } from '@/lib/store';
 import { CONTACT } from '@/lib/contact';
 import AnnouncementBody from '@/components/AnnouncementBody';
 
@@ -39,7 +40,7 @@ export default function AnnouncementsPage() {
 async function List() {
   // Announcements are edited from /admin/content, so read them per request
   await io();
-  const announcements = getAnnouncements();
+  const announcements = await runWithDatabase(async () => getAnnouncements());
   if (announcements.length === 0) {
     return <p className="p-10 rounded-3xl bg-white border border-slate-200 text-center text-sm text-slate-400">មិនទាន់មានសេចក្តីជូនដំណឹងទេ</p>;
   }

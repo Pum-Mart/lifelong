@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUserByEmail } from '@/lib/db';
+import { withDatabase } from '@/lib/store';
 import {
   clearLoginFailures,
   loginLockedFor,
@@ -10,7 +11,7 @@ import {
 } from '@/lib/auth';
 
 // Body: { email, password }
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const email = String(body.email ?? '').trim().toLowerCase();
@@ -40,3 +41,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to log in' }, { status: 500 });
   }
 }
+
+export const POST = withDatabase(handlePOST);

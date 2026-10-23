@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { downloadsLeft, getCertificateById, getDownloadRequestsFor, DOWNLOADS_PER_GRANT } from '@/lib/db';
 import { canApproveResults, getSessionUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Public for verification. The owner (and approvers) also get their download allowance.
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -42,3 +43,5 @@ export async function GET(
     return NextResponse.json({ success: false, error: 'Failed to fetch certificate' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);

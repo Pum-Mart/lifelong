@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { deleteSession, getCourseBySlug, getCourseStudents, saveSession } from '@/lib/db';
 import { canManageCourse, requireStaff } from '@/lib/auth';
 import { StudentDayRecord, TeacherStatus } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 async function authorize(courseId: string) {
   const auth = await requireStaff();
@@ -23,7 +24,7 @@ const score = (value: unknown): number | undefined => {
 // Body: { date, lessonTitle, teacherStatus, teacherNote, lessonCompleted, hasTest, hasExercise,
 //         records: { [userId]: { present, testDone, testScore, exerciseDone, exerciseScore } } }
 // Saving the same date again updates that day.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -72,7 +73,7 @@ export async function POST(
 }
 
 // ?id=<sessionId>
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -84,3 +85,6 @@ export async function DELETE(
   const ok = deleteSession(auth.course.id, id);
   return NextResponse.json({ success: ok }, { status: ok ? 200 : 404 });
 }
+
+export const POST = withDatabase(handlePOST);
+export const DELETE = withDatabase(handleDELETE);

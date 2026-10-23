@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { getActivities, saveActivity } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
+import { withDatabase } from '@/lib/store';
 
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({ success: true, activities: getActivities() });
 }
 
 // Multipart form: title, description, date (YYYY-MM-DD), photo (required)
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -31,3 +32,6 @@ export async function POST(request: Request) {
   });
   return NextResponse.json({ success: true, activity });
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

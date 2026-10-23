@@ -12,6 +12,7 @@ import {
   standingFor
 } from '@/lib/assessments';
 import { AssessmentKind } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 async function authorize(courseId: string) {
   const auth = await requireUser();
@@ -31,7 +32,7 @@ async function authorize(courseId: string) {
 }
 
 // The learner's standing, certificate state and the question sets (without answers)
-export async function GET(
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -61,7 +62,7 @@ export async function GET(
 }
 
 // Body: { kind: 'pretest' | 'homework' | 'exam', lessonId?, answers: { [questionId]: shownIndex } }
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -108,3 +109,6 @@ export async function POST(
   const certificate = await evaluateCertificate(user, course, kind === 'exam');
   return NextResponse.json({ success: true, result, standing: standingFor(user, course), certificate, examAllowance: examAllowance(user.id, course.id) });
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

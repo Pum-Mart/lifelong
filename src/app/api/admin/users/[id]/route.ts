@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getInstructors, getUserById, updateUser } from '@/lib/db';
 import { isOwnerEmail, requireAdmin, toSessionUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Body: { role?: 'student' | 'teacher' | 'admin', instructorId?: string, staffTitle?: 'director' | 'committee' | null, isMember?: boolean }
-export async function PATCH(
+async function handlePATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -64,3 +65,5 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: 'Failed to update user' }, { status: 500 });
   }
 }
+
+export const PATCH = withDatabase(handlePATCH);

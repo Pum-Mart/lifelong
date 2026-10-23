@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import { getAnnouncements, saveAnnouncement } from '@/lib/content';
 import { getSessionUser, requireAdmin } from '@/lib/auth';
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
+import { withDatabase } from '@/lib/store';
 
 // Published announcements; admins get drafts too with ?all=1
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const all = new URL(request.url).searchParams.get('all') === '1';
   const user = all ? await getSessionUser() : null;
   return NextResponse.json({ success: true, announcements: getAnnouncements(Boolean(user && user.role === 'admin')) });
 }
 
 // Multipart form: title, body, published ('true'/'false'), image (optional)
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -33,3 +34,6 @@ export async function POST(request: Request) {
   });
   return NextResponse.json({ success: true, announcement });
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

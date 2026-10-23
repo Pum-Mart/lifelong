@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { getUsers, reviewCertificateRequest } from '@/lib/db';
 import { approverTitle, canApproveResults, requireUser } from '@/lib/auth';
 import { deliver } from '@/lib/reports';
+import { withDatabase } from '@/lib/store';
 
 // Body: { action: 'approve' | 'reject', note? }. Approving issues the certificate automatically.
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -42,3 +43,5 @@ export async function POST(
   }
   return NextResponse.json({ success: true, ...result });
 }
+
+export const POST = withDatabase(handlePOST);

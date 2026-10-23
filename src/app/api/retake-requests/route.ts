@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getRetakeRequests } from '@/lib/db';
 import { canApproveResults, requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // Exam retake letters for the director, committee and admins: pending first
-export async function GET() {
+async function handleGET() {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
   if (!canApproveResults(auth.user)) {
@@ -13,3 +14,5 @@ export async function GET() {
   const requests = [...getRetakeRequests()].sort((a, b) => order[a.status] - order[b.status] || b.createdAt.localeCompare(a.createdAt));
   return NextResponse.json({ success: true, requests });
 }
+
+export const GET = withDatabase(handleGET);

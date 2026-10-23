@@ -3,9 +3,10 @@ import { getCourseBySlug, getEnrollments, getRegistrations, createRegistration }
 import { imageFrom, saveImage, validateImage } from '@/lib/uploads';
 import { notifyNewRegistration } from '@/lib/telegram';
 import { requireUser } from '@/lib/auth';
+import { withDatabase } from '@/lib/store';
 
 // ?scope=all lists every registration (admins only); otherwise the user's own
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
 
 // Multipart form: courseId, fullNameKh, fullNameEn, gender, dateOfBirth, phone,
 // address, telegramUsername, photo (4x6 portrait image). For the signed-in user.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireUser();
   if ('response' in auth) return auth.response;
 
@@ -100,3 +101,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to submit registration' }, { status: 500 });
   }
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);

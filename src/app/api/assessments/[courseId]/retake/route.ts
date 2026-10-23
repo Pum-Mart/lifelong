@@ -4,9 +4,10 @@ import { requireUser } from '@/lib/auth';
 import { examAllowance, khmerNumber } from '@/lib/assessments';
 import { deliver } from '@/lib/reports';
 import { escapeHtml, sendTelegramMessage } from '@/lib/telegram';
+import { withDatabase } from '@/lib/store';
 
 // Body: { reason } — letter asking for the next exam round, once this round's attempts are used
-export async function POST(
+async function handlePOST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
@@ -65,3 +66,5 @@ export async function POST(
 
   return NextResponse.json({ success: true, request: retake });
 }
+
+export const POST = withDatabase(handlePOST);

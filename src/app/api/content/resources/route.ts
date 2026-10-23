@@ -3,15 +3,16 @@ import { getResources, saveResource } from '@/lib/content';
 import { requireAdmin } from '@/lib/auth';
 import { imageFrom, saveDocument, validateDocument } from '@/lib/uploads';
 import { ResourceType } from '@/types';
+import { withDatabase } from '@/lib/store';
 
 const RESOURCE_TYPES: ResourceType[] = ['guides', 'curricula', 'toolkits', 'publications', 'teaching'];
 
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({ success: true, resources: getResources() });
 }
 
 // Multipart form: title, type, category, description, file (PDF/Word/Excel/PowerPoint/TXT/image)
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await requireAdmin();
   if ('response' in auth) return auth.response;
 
@@ -35,3 +36,6 @@ export async function POST(request: Request) {
   });
   return NextResponse.json({ success: true, resource });
 }
+
+export const GET = withDatabase(handleGET);
+export const POST = withDatabase(handlePOST);
