@@ -3,6 +3,7 @@ import { getCourses, saveCourse } from '@/lib/db';
 import { Course, CourseModule } from '@/types';
 import { requireAdmin } from '@/lib/auth';
 import { publicCourse } from '@/lib/assessments';
+import { isValidDate, parseSchedule } from '@/lib/schedule';
 
 export async function GET(request: Request) {
   try {
@@ -49,10 +50,23 @@ export async function POST(request: Request) {
     if (!body.title || !body.category) {
       return NextResponse.json({ success: false, error: 'Title and category are required' }, { status: 400 });
     }
+    const { schedule, error: scheduleError } = parseSchedule(body);
+    if (scheduleError) return NextResponse.json({ success: false, error: scheduleError }, { status: 400 });
+    for (const key of ['startDate', 'endDate']) {
+      if (body[key] && !isValidDate(body[key])) {
+        return NextResponse.json({ success: false, error: 'កាលបរិច្ឆេទមិនត្រឹមត្រូវ' }, { status: 400 });
+      }
+    }
+    if (body.startDate && body.endDate && body.endDate < body.startDate) {
+      return NextResponse.json({ success: false, error: 'ថ្ងៃបញ្ចប់ត្រូវនៅក្រោយថ្ងៃចាប់ផ្តើម' }, { status: 400 });
+    }
 
+    const id = body.id || `course-${Date.now()}`;
+    // A Khmer title has no latin letters to build a slug from, so fall back to the id
+    const titleSlug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const newCourse: Course = {
-      id: body.id || `course-${Date.now()}`,
-      slug: body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      id,
+      slug: body.slug || (titleSlug && !getCourses().some(c => c.slug === titleSlug) ? titleSlug : id),
       title: body.title,
       subtitle: body.subtitle || '',
       description: body.description || '',
@@ -73,8 +87,9 @@ export async function POST(request: Request) {
       targetAudience: body.targetAudience || ['All adult learners'],
       ceus: Number(body.ceus) || 1.0,
       badge: body.badge || 'New',
-      startDate: /^\d{4}-\d{2}-\d{2}$/.test(body.startDate || '') ? body.startDate : undefined,
-      endDate: /^\d{4}-\d{2}-\d{2}$/.test(body.endDate || '') ? body.endDate : undefined,
+      startDate: body.startDate || undefined,
+      endDate: body.endDate || undefined,
+      ...schedule,
       enrolledStudentsCount: 0,
       updatedAt: new Date().toISOString().split('T')[0],
       modules: body.modules || [

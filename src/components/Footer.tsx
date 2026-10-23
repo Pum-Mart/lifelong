@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { GraduationCap, ShieldCheck, Heart, Award, Mail, Phone, MapPin, Send } from 'lucide-react';
+import { ShieldCheck, Heart, Award, Mail, Phone, MapPin, Send } from 'lucide-react';
+import DropLogo from '@/components/DropLogo';
 import { CONTACT } from '@/lib/contact';
 
 // lucide no longer ships brand icons
@@ -32,9 +33,7 @@ export default function Footer() {
           {/* Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-700 to-slate-900 flex items-center justify-center text-amber-400 shadow-lg border border-amber-400/30">
-                <GraduationCap className="w-7 h-7" />
-              </div>
+              <DropLogo width={44} />
               <div>
                 <span className="block text-base sm:text-lg font-bold text-white tracking-tight leading-tight uppercase">LIFELONG LEARNING CENTER</span>
                 <span className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider">

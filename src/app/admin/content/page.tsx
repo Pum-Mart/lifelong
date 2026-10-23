@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Camera, FileText, LayoutDashboard, Mail, Megaphone, MoveHorizontal, ShieldCheck } from 'lucide-react';
+import { BookOpen, CalendarCheck, Camera, FileText, LayoutDashboard, Mail, Megaphone, MoveHorizontal, ShieldCheck } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import LoginRequired from '@/components/LoginRequired';
 import AnnouncementsManager from '@/components/admin/AnnouncementsManager';
@@ -10,9 +10,11 @@ import TickerManager from '@/components/admin/TickerManager';
 import CourseContentManager from '@/components/admin/CourseContentManager';
 import ResourcesManager from '@/components/admin/ResourcesManager';
 import MessagesManager from '@/components/admin/MessagesManager';
+import ClassNoticesManager from '@/components/ClassNoticesManager';
 
 const TABS = [
   { key: 'announcements', label: 'សេចក្តីជូនដំណឹង', icon: Megaphone },
+  { key: 'classNotices', label: 'ជូនដំណឹងចូលរៀន / សម្រាក', icon: CalendarCheck },
   { key: 'activities', label: 'សកម្មភាពប្រចាំថ្ងៃ', icon: Camera },
   { key: 'ticker', label: 'អក្សររត់', icon: MoveHorizontal },
   { key: 'courses', label: 'វគ្គសិក្សា & ការបណ្តុះបណ្តាល', icon: BookOpen },
@@ -62,6 +64,7 @@ export default function ContentAdminPage() {
 
       <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6">
         {tab === 'announcements' && <AnnouncementsManager />}
+        {tab === 'classNotices' && <ClassNoticesManager />}
         {tab === 'activities' && <ActivitiesManager />}
         {tab === 'ticker' && <TickerManager />}
         {tab === 'courses' && <CourseContentManager />}

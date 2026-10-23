@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Certificate } from '@/types';
+import DropLogo from '@/components/DropLogo';
 import { 
   Award, 
   Printer, 
@@ -245,7 +246,7 @@ function CertificateContent() {
           {/* Seal and the single signature of the centre director */}
           <div className="pt-10 grid grid-cols-1 sm:grid-cols-2 gap-8 items-end border-t border-slate-200 text-xs">
             <div className="flex flex-col items-center space-y-1">
-              <img src="/logo-plllc.svg" alt="" className="w-16 h-16 rounded-full opacity-90" />
+              <DropLogo width={64} alt="" />
               <span className="text-[10px] text-slate-400 font-mono">ចេញថ្ងៃ {cert.issueDate}</span>
             </div>
 

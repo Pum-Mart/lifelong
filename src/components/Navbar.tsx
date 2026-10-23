@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import DropLogo from '@/components/DropLogo';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -65,6 +66,9 @@ export default function Navbar() {
   // Navbar hydrates inside a Suspense boundary, possibly after the session check has
   // finished; render account UI only after mount so it matches the server HTML.
   const showAuth = mounted && authReady;
+  // The saved text size comes from localStorage, which the server cannot see: highlight
+  // the default button until mounted so the first render matches the server HTML.
+  const activeTextSize = mounted ? textSize : 'normal';
 
   // Unread inbox count: refreshed on navigation and when the inbox marks items read
   const [unread, setUnread] = useState(0);
@@ -128,21 +132,21 @@ export default function Navbar() {
                 <span className="text-slate-400 hidden sm:inline mr-1">Text:</span>
                 <button 
                   onClick={() => setTextSize('normal')}
-                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${textSize === 'normal' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${activeTextSize === 'normal' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
                   title="Standard reading text"
                 >
                   A
                 </button>
                 <button 
                   onClick={() => setTextSize('large')}
-                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${textSize === 'large' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${activeTextSize === 'large' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
                   title="Large readable text"
                 >
                   A+
                 </button>
                 <button 
                   onClick={() => setTextSize('xlarge')}
-                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${textSize === 'xlarge' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${activeTextSize === 'xlarge' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
                   title="Extra-large senior-friendly text"
                 >
                   A++
@@ -225,13 +229,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-              <img
-                src="/logo-plllc.svg"
-                alt="Plllc"
-                width={56}
-                height={56}
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full"
-              />
+              <DropLogo width={50} fall />
               <div className="hidden sm:block">
                 <span className="block text-sm sm:text-base lg:text-lg font-bold tracking-tight text-white group-hover:text-amber-300 transition leading-tight">
                   LIFELONG LEARNING CENTER

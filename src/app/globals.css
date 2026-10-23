@@ -94,8 +94,26 @@ body {
   animation-play-state: paused;
 }
 
+/* Falling water-drop shape (point up, round bottom); viewBox 100×130, round part is a circle r45 at (50,85) */
+.drop-shape {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 130'%3E%3Cpath d='M50 0 C58 22 95 52 95 85 A45 45 0 1 1 5 85 C5 52 42 22 50 0 Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 130'%3E%3Cpath d='M50 0 C58 22 95 52 95 85 A45 45 0 1 1 5 85 C5 52 42 22 50 0 Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+@keyframes drop-fall {
+  0% { transform: translateY(-28px) scaleY(1.08); opacity: 0; }
+  70% { transform: translateY(3px) scaleY(0.96); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+.drop-fall {
+  animation: drop-fall 0.7s cubic-bezier(0.33, 0, 0.2, 1) both;
+  transform-origin: bottom center;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track {
+  .ticker-track,
+  .drop-fall {
     animation: none;
   }
 }

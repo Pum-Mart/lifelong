@@ -7,6 +7,7 @@ import { Course, Registration, SessionUser } from '@/types';
 import CourseCard from '@/components/CourseCard';
 import LoginRequired from '@/components/LoginRequired';
 import MyGrades from '@/components/MyGrades';
+import UpcomingClassNotices from '@/components/UpcomingClassNotices';
 import {
   Award,
   PlayCircle,
@@ -119,6 +120,8 @@ function MyLearningContent({ currentUser }: { currentUser: SessionUser }) {
           </div>
         </div>
       </div>
+
+      <UpcomingClassNotices />
 
       <MyGrades />
 

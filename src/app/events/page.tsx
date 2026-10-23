@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export default function EventsPage() {
-  const { showNotification } = useApp();
+  const { showNotification, requireLogin, currentUser } = useApp();
   const [events, setEvents] = useState<WorkshopEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterFormat, setFilterFormat] = useState<'all' | 'Online' | 'In-Person'>('all');
@@ -30,6 +30,7 @@ export default function EventsPage() {
         const data = await res.json();
         if (data.success) {
           setEvents(data.events);
+          setRsvpdEventIds(data.rsvpdEventIds || []);
         }
       } catch (e) {
         console.error(e);
@@ -38,13 +39,14 @@ export default function EventsPage() {
       }
     }
     loadEvents();
-  }, []);
+  }, [currentUser?.id]);
 
   const handleRSVP = async (event: WorkshopEvent) => {
     if (rsvpdEventIds.includes(event.id)) {
       showNotification('You have already reserved a seat for this session!', 'info');
       return;
     }
+    if (!requireLogin()) return;
 
     try {
       const res = await fetch('/api/events', {
@@ -53,13 +55,21 @@ export default function EventsPage() {
         body: JSON.stringify({ eventId: event.id })
       });
       const data = await res.json();
-      if (data.success) {
-        setRsvpdEventIds(prev => [...prev, event.id]);
-        setEvents(prev => prev.map(e => e.id === event.id ? data.event : e));
-        showNotification(`Seat confirmed for "${event.title}"! We'll email you the link & reminders.`);
+      if (!data.success) {
+        showNotification(data.error || 'Could not reserve a seat', 'warning');
+        return;
       }
+      setRsvpdEventIds(prev => [...prev, event.id]);
+      setEvents(prev => prev.map(e => e.id === event.id ? data.event : e));
+      showNotification(
+        data.alreadyBooked
+          ? 'You have already reserved a seat for this session!'
+          : `Seat confirmed for "${event.title}"! We'll email you the link & reminders.`,
+        data.alreadyBooked ? 'info' : undefined
+      );
     } catch (err) {
       console.error(err);
+      showNotification('Could not reach the server', 'warning');
     }
   };
 

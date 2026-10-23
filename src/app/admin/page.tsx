@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { Course, AdminAnalytics, Payment, Instructor, Registration, SessionUser } from '@/types';
 import { formatKhr, formatUsd } from '@/lib/payment';
 import CourseFormModal from '@/components/admin/CourseFormModal';
+import { formatClassDays, formatClassTime, formatKhmerDate } from '@/lib/schedule';
 import TeachersManager from '@/components/admin/TeachersManager';
 import UsersManager from '@/components/admin/UsersManager';
 import LoginRequired from '@/components/LoginRequired';
@@ -266,6 +267,7 @@ function AdminDashboard({ currentUser }: { currentUser: SessionUser }) {
                 <th className="pb-3 font-semibold">វគ្គ</th>
                 <th className="pb-3 font-semibold">គ្រូបង្រៀន</th>
                 <th className="pb-3 font-semibold">រយៈពេល</th>
+                <th className="pb-3 font-semibold">កាលវិភាគ</th>
                 <th className="pb-3 font-semibold">តម្លៃ</th>
                 <th className="pb-3 font-semibold">សិស្ស</th>
                 <th className="pb-3 font-semibold text-right">សកម្មភាព</th>
@@ -289,6 +291,22 @@ function AdminDashboard({ currentUser }: { currentUser: SessionUser }) {
                   </td>
                   <td className="py-3.5 pr-4 font-medium text-slate-600">{course.instructor?.name || '—'}</td>
                   <td className="py-3.5 pr-4 text-slate-600">{course.duration}</td>
+                  <td className="py-3.5 pr-4 text-slate-600 whitespace-nowrap">
+                    {course.classDays?.length || course.classStartTime || course.startDate ? (
+                      <>
+                        <div className="font-semibold text-slate-800">
+                          {[formatClassDays(course.classDays), formatClassTime(course.classStartTime, course.classEndTime)].filter(Boolean).join(' • ') || '—'}
+                        </div>
+                        {course.startDate && (
+                          <div className="text-[11px] text-slate-400">
+                            {formatKhmerDate(course.startDate)}{course.endDate && ` → ${formatKhmerDate(course.endDate)}`}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <button onClick={() => setCourseForm(course)} className="text-[11px] text-amber-600 hover:underline">+ កំណត់កាលវិភាគ</button>
+                    )}
+                  </td>
                   <td className="py-3.5 pr-4 font-bold text-slate-900">
                     {course.price === 0 ? 'ឥតគិតថ្លៃ' : `$${course.price}`}
                     {course.originalPrice > course.price && (

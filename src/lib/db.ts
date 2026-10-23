@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Course, Enrollment, Certificate, WorkshopEvent, AdminAnalytics, Instructor, Payment, PaymentStatus, Registration, UserAccount, ClassSession, ExamScore, AppNotification, CourseCompletion, AssessmentAttempt, CertificateRequest, QuizQuestion, RetakeRequest, DownloadRequest } from '@/types';
+import { Course, Enrollment, Certificate, WorkshopEvent, AdminAnalytics, Instructor, Payment, PaymentStatus, Registration, UserAccount, ClassSession, ExamScore, AppNotification, ClassNotice, CourseCompletion, AssessmentAttempt, CertificateRequest, QuizQuestion, RetakeRequest, DownloadRequest } from '@/types';
 import { INITIAL_COURSES, INSTRUCTORS, WORKSHOP_EVENTS } from './data';
 
 interface DatabaseSchema {
@@ -26,6 +26,7 @@ interface DatabaseSchema {
   sessions: ClassSession[];
   examScores: ExamScore[];
   notifications: AppNotification[];
+  classNotices: ClassNotice[];
   settings: { lastWeeklyReportDate?: string };
   completions: CourseCompletion[];
   attempts: AssessmentAttempt[];
@@ -137,6 +138,7 @@ function getInitialData(): DatabaseSchema {
     sessions: [],
     examScores: [],
     notifications: [],
+    classNotices: [],
     settings: {},
     completions: [],
     attempts: [],
@@ -167,6 +169,7 @@ export function readDatabase(): DatabaseSchema {
     parsed.sessions = parsed.sessions || [];
     parsed.examScores = parsed.examScores || [];
     parsed.notifications = parsed.notifications || [];
+    parsed.classNotices = parsed.classNotices || [];
     parsed.settings = parsed.settings || {};
     parsed.completions = parsed.completions || [];
     parsed.attempts = parsed.attempts || [];
@@ -503,6 +506,26 @@ export function markNotificationsRead(userId: string) {
   for (const n of db.notifications) {
     if (n.userId === userId && !n.readAt) n.readAt = now;
   }
+  writeDatabase(db);
+}
+
+// ---------- Class notices (class day / break) ----------
+
+export function getClassNotices(): ClassNotice[] {
+  return readDatabase().classNotices.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function addClassNotice(notice: Omit<ClassNotice, 'id' | 'createdAt'>): ClassNotice {
+  const db = readDatabase();
+  const saved: ClassNotice = { ...notice, id: `cn-${crypto.randomUUID()}`, createdAt: new Date().toISOString() };
+  db.classNotices.push(saved);
+  writeDatabase(db);
+  return saved;
+}
+
+export function deleteClassNotice(id: string) {
+  const db = readDatabase();
+  db.classNotices = db.classNotices.filter(n => n.id !== id);
   writeDatabase(db);
 }
 
@@ -895,14 +918,21 @@ export function reviewPayment(paymentId: string, status: Exclude<PaymentStatus, 
   return payment;
 }
 
-export function rsvpWorkshopEvent(eventId: string): WorkshopEvent | null {
+// One seat per account; the check and the write happen together so seats cannot be overbooked
+export function rsvpWorkshopEvent(
+  eventId: string,
+  userId: string
+): { status: 'booked' | 'already' | 'full'; event: WorkshopEvent } | null {
   const db = readDatabase();
   const event = db.events.find(e => e.id === eventId);
   if (!event) return null;
 
-  if (event.seatsBooked < event.seatsTotal) {
-    event.seatsBooked += 1;
-    writeDatabase(db);
-  }
-  return event;
+  const attendees = event.attendeeIds || [];
+  if (attendees.includes(userId)) return { status: 'already', event };
+  if (event.seatsBooked >= event.seatsTotal) return { status: 'full', event };
+
+  event.attendeeIds = [...attendees, userId];
+  event.seatsBooked += 1;
+  writeDatabase(db);
+  return { status: 'booked', event };
 }

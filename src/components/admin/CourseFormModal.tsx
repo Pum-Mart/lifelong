@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Course, CourseFormat, CourseLevel, Instructor } from '@/types';
 import { CATEGORIES } from '@/lib/data';
+import { WEEKDAYS } from '@/lib/schedule';
+import DatePartsInput, { INCOMPLETE_DATE } from './DatePartsInput';
 
 const LEVELS: CourseLevel[] = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
 const FORMATS: CourseFormat[] = ['Online Self-Paced', 'Live Webinar', 'In-Person Workshop'];
@@ -30,7 +32,13 @@ export default function CourseFormModal({ course, instructors, onClose, onSaved 
   const [instructorId, setInstructorId] = useState(course?.instructorId || instructors[0]?.id || '');
   const [startDate, setStartDate] = useState(course?.startDate || '');
   const [endDate, setEndDate] = useState(course?.endDate || '');
+  const [classDays, setClassDays] = useState<number[]>(course?.classDays || []);
+  const [classStartTime, setClassStartTime] = useState(course?.classStartTime || '');
+  const [classEndTime, setClassEndTime] = useState(course?.classEndTime || '');
   const [saving, setSaving] = useState(false);
+
+  const toggleDay = (day: number) =>
+    setClassDays(prev => (prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]));
   const [error, setError] = useState('');
 
   const submit = async (e: React.FormEvent) => {
@@ -39,7 +47,10 @@ export default function CourseFormModal({ course, instructors, onClose, onSaved 
     const priceNum = Number(price);
     if (!title.trim()) return setError('សូមបញ្ចូលឈ្មោះវគ្គ');
     if (!Number.isFinite(priceNum) || priceNum < 0) return setError('តម្លៃត្រូវជាលេខ ០ ឬច្រើនជាងនេះ');
+    if (startDate === INCOMPLETE_DATE || endDate === INCOMPLETE_DATE) return setError('សូមជ្រើសរើស ថ្ងៃ ខែ និងឆ្នាំ ឱ្យគ្រប់');
     if (startDate && endDate && endDate < startDate) return setError('ថ្ងៃបញ្ចប់ត្រូវនៅក្រោយថ្ងៃចាប់ផ្តើម');
+    if (classEndTime && !classStartTime) return setError('សូមបញ្ចូលម៉ោងចាប់ផ្តើម');
+    if (classStartTime && classEndTime && classEndTime <= classStartTime) return setError('ម៉ោងចប់ត្រូវនៅក្រោយម៉ោងចាប់ផ្តើម');
 
     const body = {
       title: title.trim(),
@@ -54,7 +65,10 @@ export default function CourseFormModal({ course, instructors, onClose, onSaved 
       ceus: Number(ceus) || 0,
       instructorId,
       startDate,
-      endDate
+      endDate,
+      classDays,
+      classStartTime,
+      classEndTime
     };
 
     setSaving(true);
@@ -90,7 +104,7 @@ export default function CourseFormModal({ course, instructors, onClose, onSaved 
 
         <form onSubmit={submit} className="p-6 space-y-4 text-xs font-semibold text-slate-600">
           <label className="block">
-            ឈ្មោះវគ្គ *
+            ឈ្មោះមុខវិជ្ជា / វគ្គ *
             <input required value={title} onChange={e => setTitle(e.target.value)} className={inputClass} />
           </label>
           <label className="block">
@@ -115,16 +129,44 @@ export default function CourseFormModal({ course, instructors, onClose, onSaved 
             </label>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="block">
-              ថ្ងៃចាប់ផ្តើមវគ្គ
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputClass} />
-            </label>
-            <label className="block">
-              ថ្ងៃបញ្ចប់វគ្គ
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={inputClass} />
-              <span className="block mt-1 text-[11px] font-normal text-slate-400">ប្រើសម្រាប់រាប់ថ្ងៃនៅសល់ និងសារបញ្ចប់វគ្គ</span>
-            </label>
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 space-y-4">
+            <div className="font-moul text-[13px] text-emerald-800 leading-relaxed">កាលវិភាគសិក្សា</div>
+
+            <fieldset>
+              <legend>ថ្ងៃរៀន</legend>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {WEEKDAYS.map(w => {
+                  const on = classDays.includes(w.value);
+                  return (
+                    <button
+                      key={w.value}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => toggleDay(w.value)}
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition ${on ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white border-slate-300 text-slate-600 hover:border-emerald-400'}`}
+                    >
+                      {w.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <div className="grid grid-cols-2 gap-4">
+              <label className="block">
+                ម៉ោងចាប់ផ្តើម
+                <input type="time" value={classStartTime} onChange={e => setClassStartTime(e.target.value)} className={inputClass} />
+              </label>
+              <label className="block">
+                ម៉ោងចប់
+                <input type="time" value={classEndTime} onChange={e => setClassEndTime(e.target.value)} className={inputClass} />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <DatePartsInput label="ថ្ងៃចាប់ផ្តើមវគ្គ" value={startDate} onChange={setStartDate} />
+              <DatePartsInput label="ថ្ងៃបញ្ចប់វគ្គ" value={endDate} onChange={setEndDate} hint="ប្រើសម្រាប់រាប់ថ្ងៃនៅសល់ និងសារបញ្ចប់វគ្គ" />
+            </div>
           </div>
 
           <label className="block">

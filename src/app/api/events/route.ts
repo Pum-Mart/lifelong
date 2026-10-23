@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { readDatabase, rsvpWorkshopEvent } from '@/lib/db';
+import { getSessionUser, requireUser } from '@/lib/auth';
 import { notifyEventRsvp } from '@/lib/telegram';
+import { WorkshopEvent } from '@/types';
+
+// Attendee ids stay on the server
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const publicEvent = ({ attendeeIds, ...event }: WorkshopEvent) => event;
 
 export async function GET() {
   try {
     const db = readDatabase();
-    return NextResponse.json({ success: true, events: db.events });
+    const user = await getSessionUser();
+    const rsvpdEventIds = user ? db.events.filter(e => e.attendeeIds?.includes(user.id)).map(e => e.id) : [];
+    return NextResponse.json({ success: true, events: db.events.map(publicEvent), rsvpdEventIds });
   } catch (error) {
     console.error('Error fetching events:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch events' }, { status: 500 });
@@ -13,6 +21,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireUser();
+  if ('response' in auth) return auth.response;
+
   try {
     const body = await request.json();
     const { eventId } = body;
@@ -20,19 +31,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'eventId is required' }, { status: 400 });
     }
 
-    const current = readDatabase().events.find(e => e.id === eventId);
-    if (current && current.seatsBooked >= current.seatsTotal) {
-      return NextResponse.json({ success: false, error: 'សិក្ខាសាលានេះពេញហើយ' }, { status: 409 });
-    }
-
-    const updatedEvent = rsvpWorkshopEvent(eventId);
-    if (!updatedEvent) {
+    const result = rsvpWorkshopEvent(eventId, auth.user.id);
+    if (!result) {
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
     }
+    if (result.status === 'full') {
+      return NextResponse.json({ success: false, error: 'សិក្ខាសាលានេះពេញហើយ' }, { status: 409 });
+    }
+    if (result.status === 'booked') await notifyEventRsvp(result.event);
 
-    await notifyEventRsvp(updatedEvent);
-
-    return NextResponse.json({ success: true, event: updatedEvent });
+    return NextResponse.json({ success: true, event: publicEvent(result.event), alreadyBooked: result.status === 'already' });
   } catch (error) {
     console.error('Error in event RSVP:', error);
     return NextResponse.json({ success: false, error: 'Failed to RSVP' }, { status: 500 });

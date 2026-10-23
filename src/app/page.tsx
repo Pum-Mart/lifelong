@@ -61,6 +61,7 @@ import {
   X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import DropLogo from '@/components/DropLogo';
 
 // Library documents come from /api/content/resources (managed at /admin/content)
 const RESOURCE_TYPE_NAMES: Record<string, string> = {
@@ -89,7 +90,8 @@ export default function UnifiedPlatformPage() {
     enrollments,
     pendingCourseIds,
     buyCourse,
-    showNotification
+    showNotification,
+    requireLogin
   } = useApp();
 
   // Courses & Data state
@@ -196,7 +198,10 @@ export default function UnifiedPlatformPage() {
         setCourses(coursesJson.courses);
       }
 
-      if (eventsJson.success) setEvents(eventsJson.events);
+      if (eventsJson.success) {
+        setEvents(eventsJson.events);
+        setRsvpdEventIds(eventsJson.rsvpdEventIds || []);
+      }
       if (statsJson.success) setAdminStats(statsJson.stats);
       if (certJson.success && certJson.certificate) {
         setCertificateData(certJson.certificate);
@@ -261,6 +266,7 @@ export default function UnifiedPlatformPage() {
       showNotification('សិក្ខាសាលានេះពេញហើយ', 'warning');
       return;
     }
+    if (!requireLogin()) return;
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -274,6 +280,7 @@ export default function UnifiedPlatformPage() {
       }
       setRsvpdEventIds(prev => [...prev, event.id]);
       setEvents(prev => prev.map(e => (e.id === event.id ? data.event : e)));
+      if (data.alreadyBooked) return;
       confetti({ particleCount: 50, spread: 50 });
       showNotification(`អ្នកបានកក់កន្លែងចូលរួម "${event.title}" ដោយជោគជ័យ!`);
     } catch {
@@ -333,7 +340,7 @@ export default function UnifiedPlatformPage() {
 
   // Resource download: the browser downloads the file; the count updates locally
   const handleDownloadResource = (resource: LibraryResource) => {
-    window.location.href = `/api/content/resources/${resource.id}/download`;
+    window.location.assign(`/api/content/resources/${resource.id}/download`);
     setResources(prev => prev.map(r => (r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r)));
   };
 
@@ -657,7 +664,7 @@ export default function UnifiedPlatformPage() {
                 {/* Seal and the single signature of the centre director */}
                 <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 items-end border-t border-slate-200 text-xs">
                   <div className="flex flex-col items-center">
-                    <img src="/logo-plllc.svg" alt="" className="w-12 h-12 rounded-full" />
+                    <DropLogo width={48} alt="" />
                     <span className="text-[10px] text-slate-400 font-mono mt-1">{certificateData.issueDate}</span>
                   </div>
                   <div className="text-center">

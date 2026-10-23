@@ -8,6 +8,7 @@ import CompletionPanel from '@/components/CompletionPanel';
 import { ClassSession, ExamScore, GradeBreakdown, StudentDayRecord, TeacherStatus } from '@/types';
 import { GRADE_WEIGHTS, gradeLabel } from '@/lib/grades';
 import AssessmentEditor from '@/components/AssessmentEditor';
+import ClassNoticesManager from '@/components/ClassNoticesManager';
 
 interface ClassCourse {
   id: string;
@@ -81,7 +82,7 @@ function AttendanceBook() {
   const [courses, setCourses] = useState<ClassCourse[]>([]);
   const [courseId, setCourseId] = useState('');
   const [book, setBook] = useState<ClassBook | null>(null);
-  const [tab, setTab] = useState<'daily' | 'grades' | 'tests' | 'complete'>('daily');
+  const [tab, setTab] = useState<'daily' | 'grades' | 'tests' | 'notices' | 'complete'>('daily');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -206,13 +207,13 @@ function AttendanceBook() {
           </div>
 
           <div className="flex gap-6 border-b border-slate-200 text-sm">
-            {(['daily', 'grades', 'tests', 'complete'] as const).map(t => (
+            {(['daily', 'grades', 'tests', 'notices', 'complete'] as const).map(t => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 className={`pb-3 font-bold border-b-2 transition ${tab === t ? 'border-emerald-600 text-emerald-800' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
               >
-                {t === 'daily' ? 'វត្តមាន & មេរៀនប្រចាំថ្ងៃ' : t === 'grades' ? 'ពិន្ទុសរុប' : t === 'tests' ? 'តេស្ត & ប្រឡង' : 'បញ្ចប់វគ្គ & វិញ្ញាបនបត្រ'}
+                {t === 'daily' ? 'វត្តមាន & មេរៀនប្រចាំថ្ងៃ' : t === 'grades' ? 'ពិន្ទុសរុប' : t === 'tests' ? 'តេស្ត & ប្រឡង' : t === 'notices' ? 'ជូនដំណឹងចូលរៀន / សម្រាក' : 'បញ្ចប់វគ្គ & វិញ្ញាបនបត្រ'}
               </button>
             ))}
           </div>
@@ -404,6 +405,11 @@ function AttendanceBook() {
 
           {tab === 'complete' && <CompletionPanel key={book.course.id} courseId={book.course.id} />}
           {tab === 'tests' && <AssessmentEditor key={book.course.id} courseId={book.course.id} />}
+          {tab === 'notices' && (
+            <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6">
+              <ClassNoticesManager key={book.course.id} courseId={book.course.id} />
+            </section>
+          )}
 
           {tab === 'grades' && (
             <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 overflow-x-auto">

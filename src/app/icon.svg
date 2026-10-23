@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <circle cx="60" cy="60" r="58" fill="#064e3b"/>
-  <circle cx="60" cy="60" r="54" fill="none" stroke="#fbbf24" stroke-width="3"/>
-  <text x="60" y="74" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">
+  <!-- Falling water drop, same as the site logo (DropLogo): gold outline, deep green fill -->
+  <path d="M60 3 C67 23 100 48 100 78 A40 40 0 1 1 20 78 C20 48 53 23 60 3 Z" fill="#064e3b" stroke="#fbbf24" stroke-width="4" stroke-linejoin="round"/>
+  <text x="60" y="90" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">
     <tspan fill="#3b82f6">P</tspan><tspan fill="#facc15">l</tspan><tspan fill="#ef4444">l</tspan><tspan fill="#ffffff">l</tspan><tspan fill="#f97316">c</tspan>
   </text>
 </svg>

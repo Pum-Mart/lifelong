@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BadgePercent, Eye, EyeOff, GraduationCap } from 'lucide-react';
+import { BadgePercent, Eye, EyeOff } from 'lucide-react';
+import DropLogo from '@/components/DropLogo';
 import { useApp } from '@/context/AppContext';
 import { MEMBER_DISCOUNT_PERCENT } from '@/lib/payment';
 
@@ -47,21 +48,25 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
   return (
     <div className="max-w-md mx-auto px-4 py-14 font-siemreap">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-700 to-slate-900 text-amber-400 flex items-center justify-center mx-auto">
-            <GraduationCap className="w-7 h-7" />
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        {/* Same colours and logo as the navigation bar */}
+        <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-800 border-b-2 border-amber-400 px-6 py-6 text-center space-y-2">
+          <DropLogo width={80} fall className="mx-auto" />
+          <div>
+            <span className="block text-sm font-bold tracking-tight text-white">LIFELONG LEARNING CENTER</span>
+            <span className="block text-[11px] font-semibold text-amber-300">មជ្ឈមណ្ឌលសិក្សាពេញមួយជីវិត</span>
           </div>
-          <h1 className="font-moul text-xl text-slate-900 leading-relaxed">
+          <h1 className="font-moul text-xl text-white leading-relaxed pt-1">
             {mode === 'login' ? 'ចូលគណនី' : 'ចុះឈ្មោះជាសមាជិក'}
           </h1>
           {mode === 'signup' && (
-            <p className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full">
+            <p className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-950 bg-amber-300 px-3 py-1 rounded-full">
               <BadgePercent className="w-4 h-4" /> សមាជិកទទួលបានការបញ្ចុះតម្លៃ {MEMBER_DISCOUNT_PERCENT}% គ្រប់វគ្គ
             </p>
           )}
         </div>
 
+        <div className="p-6 sm:p-8 space-y-6">
         <form onSubmit={submit} className="space-y-4 text-xs font-semibold text-slate-600">
           {mode === 'signup' && (
             <label className="block">
@@ -108,7 +113,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
 
           {error && <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 font-normal">{error}</div>}
 
-          <button type="submit" disabled={submitting} className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 disabled:opacity-50">
+          <button type="submit" disabled={submitting} className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-800 hover:brightness-125 border-b-2 border-amber-400 text-white font-bold text-sm shadow-lg shadow-emerald-950/30 transition disabled:opacity-50">
             {submitting ? 'សូមរង់ចាំ...' : mode === 'login' ? 'ចូលគណនី' : 'បង្កើតគណនី'}
           </button>
         </form>
@@ -119,6 +124,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
             {mode === 'login' ? 'ចុះឈ្មោះជាសមាជិក' : 'ចូលគណនី'}
           </Link>
         </p>
+        </div>
       </div>
     </div>
   );

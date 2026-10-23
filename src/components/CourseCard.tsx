@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { Course } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { Star, Clock, BookOpen, Award, CheckCircle, Heart, ShoppingBag } from 'lucide-react';
+import { Star, Clock, BookOpen, Award, CheckCircle, Heart, ShoppingBag, Calendar } from 'lucide-react';
+import { formatClassDays, formatClassTime } from '@/lib/schedule';
 
 interface CourseCardProps {
   course: Course;
@@ -98,6 +99,12 @@ export default function CourseCard({ course }: CourseCardProps) {
               <BookOpen className="w-3.5 h-3.5 text-slate-400" />
               <span>{course.lecturesCount} lessons</span>
             </div>
+            {course.classStartTime && (
+              <div className="flex items-center gap-1" title={formatClassDays(course.classDays)}>
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span>{formatClassTime(course.classStartTime, course.classEndTime)}</span>
+              </div>
+            )}
             {course.ceus && (
               <div className="flex items-center gap-1 text-indigo-600 font-semibold ml-auto">
                 <Award className="w-3.5 h-3.5" />

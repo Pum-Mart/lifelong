@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Course } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { 
+import { formatClassDays, formatClassTime, formatKhmerDate } from '@/lib/schedule';
+import {
   Star, 
   Clock, 
   BookOpen, 
@@ -302,6 +303,22 @@ function CourseDetailContent() {
                     <Clock className="w-4 h-4 text-emerald-600" />
                     <span>រយៈពេលសិក្សា {course.duration}</span>
                   </div>
+                  {(course.classDays?.length || course.classStartTime) && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-emerald-600" />
+                      <span>
+                        រៀន {[formatClassDays(course.classDays), formatClassTime(course.classStartTime, course.classEndTime)].filter(Boolean).join(' • ')}
+                      </span>
+                    </div>
+                  )}
+                  {course.startDate && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-emerald-600" />
+                      <span>
+                        ចាប់ផ្តើម {formatKhmerDate(course.startDate)}{course.endDate && ` • បញ្ចប់ ${formatKhmerDate(course.endDate)}`}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-emerald-600" />
                     <span>{totalLessons} មេរៀន មានខ្លឹមសារ លំហាត់អនុវត្ត និងសំណួរសាកល្បង</span>

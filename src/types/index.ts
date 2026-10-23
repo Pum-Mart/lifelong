@@ -86,6 +86,9 @@ export interface Course {
   assessments?: { preTest?: QuizQuestion[]; exam?: QuizQuestion[] }; // overrides the default bank
   startDate?: string; // YYYY-MM-DD, class schedule for attendance and countdowns
   endDate?: string; // YYYY-MM-DD
+  classDays?: number[]; // weekdays the class meets, 0 = Sunday … 6 = Saturday
+  classStartTime?: string; // HH:MM, 24-hour
+  classEndTime?: string; // HH:MM
   endNoticeSentAt?: string; // when the "course has ended" message went out
 }
 
@@ -317,6 +320,24 @@ export interface TickerMessage {
   href?: string; // where clicking the ticker goes (default: /announcements)
 }
 
+// Staff notice to a class's students: the class meets on a day, or there is a break
+export type ClassNoticeKind = 'class' | 'break';
+
+export interface ClassNotice {
+  id: string;
+  courseId: string; // a course id, or 'all' for every course (admins only)
+  courseTitle: string;
+  kind: ClassNoticeKind;
+  date: string; // YYYY-MM-DD
+  endDate?: string; // last day of a break lasting several days
+  startTime?: string; // HH:MM, class notices only
+  endTime?: string;
+  message: string;
+  createdAt: string;
+  createdBy: string; // staff name
+  recipientCount: number;
+}
+
 export interface AppNotification {
   id: string;
   userId: string;
@@ -382,6 +403,7 @@ export interface WorkshopEvent {
   isFree: boolean;
   price?: number;
   tags: string[];
+  attendeeIds?: string[]; // user ids that booked a seat; never sent to the browser
 }
 
 export type PaymentStatus = 'pending' | 'approved' | 'rejected';

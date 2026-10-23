@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth';
 import { publicCourse } from '@/lib/assessments';
 import { getCourseBySlug, saveCourse, deleteCourse, getInstructors, getCourses } from '@/lib/db';
 import { Course } from '@/types';
+import { isValidDate, parseSchedule } from '@/lib/schedule';
 
 export async function GET(
   request: Request,
@@ -50,12 +51,11 @@ export async function PUT(
     }
 
     // Dates: 'YYYY-MM-DD', or '' to clear
-    const DATE = /^\d{4}-\d{2}-\d{2}$/;
     const dateField = (key: 'startDate' | 'endDate') => (body[key] === undefined ? undefined : String(body[key]).trim());
     const startDate = dateField('startDate');
     const endDate = dateField('endDate');
     for (const value of [startDate, endDate]) {
-      if (value && !DATE.test(value)) {
+      if (value && !isValidDate(value)) {
         return NextResponse.json({ success: false, error: 'កាលបរិច្ឆេទមិនត្រឹមត្រូវ' }, { status: 400 });
       }
     }
@@ -63,6 +63,18 @@ export async function PUT(
     const finalEnd = endDate === undefined ? existing.endDate : endDate || undefined;
     if (finalStart && finalEnd && finalEnd < finalStart) {
       return NextResponse.json({ success: false, error: 'ថ្ងៃបញ្ចប់ត្រូវនៅក្រោយថ្ងៃចាប់ផ្តើម' }, { status: 400 });
+    }
+
+    const { schedule, error: scheduleError } = parseSchedule(body);
+    if (scheduleError) return NextResponse.json({ success: false, error: scheduleError }, { status: 400 });
+    const finalSchedule = {
+      classDays: existing.classDays,
+      classStartTime: existing.classStartTime,
+      classEndTime: existing.classEndTime,
+      ...schedule
+    };
+    if (finalSchedule.classStartTime && finalSchedule.classEndTime && finalSchedule.classEndTime <= finalSchedule.classStartTime) {
+      return NextResponse.json({ success: false, error: 'ម៉ោងចប់ត្រូវនៅក្រោយម៉ោងចាប់ផ្តើម' }, { status: 400 });
     }
 
     const instructorId = text('instructorId');
@@ -131,6 +143,7 @@ export async function PUT(
       ...(ceus !== undefined && { ceus }),
       startDate: finalStart,
       endDate: finalEnd,
+      ...finalSchedule,
       // A new end date means the "course ended" notice should go out again
       endNoticeSentAt: finalEnd === existing.endDate ? existing.endNoticeSentAt : undefined,
       id: existing.id,
